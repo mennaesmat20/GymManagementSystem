@@ -1,4 +1,5 @@
 ﻿using GymManagementSystem.DAL.DbContexts;
+using GymManagementSystem.DAL.Entities;
 using GymManagementSystem.DAL.Repositories.Classes;
 using GymManagementSystem.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +10,8 @@ namespace GymManagementSystem.Controllers
 {
     public class PlanController : Controller
     {
-        private readonly IPlanRepository _planRepository;
-        public PlanController(IPlanRepository planRepository)
+        private readonly IGenericRepository<Plan> _planRepository;
+        public PlanController(IGenericRepository<Plan> planRepository)
         {
             _planRepository = planRepository;
         }
