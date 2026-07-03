@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymManagementSystem.DAL.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20260629134002_CreateTables")]
+    [Migration("20260702224527_CreateTables")]
     partial class CreateTables
     {
         /// <inheritdoc />
@@ -284,6 +284,48 @@ namespace GymManagementSystem.DAL.Migrations
                     b.ToTable("Plans", t =>
                         {
                             t.HasCheckConstraint("PlanDurationCheck", "DurationDays Between 1 and 365");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Access to gym equipment during staffed hours",
+                            DurationDays = 30,
+                            IsActive = false,
+                            Name = "Basic Plan",
+                            Price = 300m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Includes gym equipment and 2 group classes per week",
+                            DurationDays = 60,
+                            IsActive = true,
+                            Name = "Standard Plan",
+                            Price = 500m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Unlimited access to equipment, classes, and sauna",
+                            DurationDays = 90,
+                            IsActive = true,
+                            Name = "Premium Plan",
+                            Price = 900m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Full year access with personal trainer sessions",
+                            DurationDays = 365,
+                            IsActive = false,
+                            Name = "Annual Plan",
+                            Price = 3000m
                         });
                 });
 

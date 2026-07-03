@@ -1,0 +1,116 @@
+﻿@model CreateTrainerViewModel
+@{
+	ViewData["Title"] = "Add Trainer";
+}
+
+<div class="container mt-4">
+    <header class="mb-4">
+        <h3 class="text-primary-color">Add New Trainer</h3>
+    </header>
+
+    <form asp-controller="Trainer" asp-action="CreateTrainer" method="post">
+
+        <!-- Trainer Info -->
+        <div class="section-header mb-3">
+            <h5 class="text-primary fw-bold">Personal Information</h5>
+            <hr class="mt-2">
+        </div>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label asp-for="Name" class="form-label">Name</label>
+                <input asp-for="Name" type="text" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" type="text" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label asp-for="Phone" class="form-label">Phone</label>
+                <input asp-for="Phone" type="text" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label asp-for="DateOfBirth" class="form-label">DateOfBirth</label>
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label asp-for="Gender" class="form-label">Gender</label>
+                <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<Gender>()">
+                    <option value="">-- Select Gender --</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+
+        </div>
+        <div class="section-header mb-3 mt-4">
+            <h5 class="text-primary fw-bold">Address Information</h5>
+            <hr class="mt-2">
+        </div>
+        <div class="row g-3">
+
+            <div class="col-12 col-md-6">
+                <label asp-for="BuildingNumber" class="form-label">BuildingNumber</label>
+                <input asp-for="BuildingNumber" type="text" class="form-control" />
+                <span asp-validation-for="BuildingNumber" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label asp-for="Street" class="form-label">Street</label>
+                <input asp-for="Street" type="text" class="form-control" />
+                <span asp-validation-for="Street" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6">
+                <label asp-for="City" class="form-label">City</label>
+                <input asp-for="City" type="text" class="form-control" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+        </div>
+        <!-- Professional Information -->
+        <div class="section-header mt-4 mb-3">
+            <h5 class="text-primary fw-bold">Professional Information</h5>
+            <hr class="mt-2">
+        </div>
+        <div class="row g-3">
+            <div class="col-12">
+                <label asp-for="Specialties" class="form-label fw-semibold">
+                    Specializations <span class="text-danger">*</span>
+                </label>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Specialties" value="GeneralFitness" />
+                    <label asp-for="Specialties" class="form-check-label">GeneralFitness</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Specialties" value="Yoga" />
+                    <label asp-for="Specialties" class="form-check-label">Yoga</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Specialties" value="Boxing" />
+                    <label asp-for="Specialties" class="form-check-label">Boxing</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Specialties" value="CrossFit" />
+                    <label asp-for="Specialties" class="form-check-label">CrossFit</label>
+                </div>
+                <span asp-validation-for="Specialties" class="text-danger"></span>
+            </div>
+        </div>
+
+        <footer class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-fill">Add</button>
+        </footer>
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
