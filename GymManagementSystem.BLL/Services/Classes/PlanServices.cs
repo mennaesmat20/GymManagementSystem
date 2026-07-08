@@ -1,5 +1,4 @@
-﻿
-using GymManagementSystem.BLL.Services.Interfaces;
+﻿using GymManagementSystem.BLL.Services.Interfaces;
 using GymManagementSystem.BLL.ViewModels.Plan_ViewModels;
 using GymManagementSystem.DAL.Entities;
 using GymManagementSystem.DAL.Repositories.Interfaces;
@@ -8,14 +7,14 @@ namespace GymManagementSystem.BLL.Services.Classes
 {
     public class PlanServices : IPlanServices
     {
-        private readonly IGenericRepository<Plan> _planRepository;
-        public PlanServices(IGenericRepository<Plan> planRepository)
+        private readonly IUnitOfWork unitOfWork;
+        public PlanServices(IUnitOfWork _unitOfWork)
         {
-            _planRepository = planRepository;
+            unitOfWork = _unitOfWork;
         }
         public async Task<IEnumerable<PlanViewModel>> GetAllPlansAsync(CancellationToken ct = default)
         {
-            var plans = await _planRepository.GetAll(false,ct);
+            var plans = await unitOfWork.GetRepository<Plan>().GetAll(false,ct);
             if(!plans.Any())
                 return [];
 
@@ -33,7 +32,7 @@ namespace GymManagementSystem.BLL.Services.Classes
 
         public async Task<PlanViewModel?> GetPlanDetailsAsync(int planId, CancellationToken ct = default)
         {
-            var plan = await _planRepository.GetById(planId, ct);
+            var plan = await unitOfWork.GetRepository<Plan>().GetById(planId, ct);
             if (plan == null)
                 return null;
 
@@ -50,7 +49,7 @@ namespace GymManagementSystem.BLL.Services.Classes
 
         public async Task<PlanToUpdateViewModel?> GetPlanToUpdateAsync(int planId, CancellationToken ct = default)
         {
-            var plan = await _planRepository.GetById(planId, ct);
+            var plan = await unitOfWork.GetRepository<Plan>().GetById(planId, ct);
             if (plan == null)
                 return null;
 
@@ -66,7 +65,7 @@ namespace GymManagementSystem.BLL.Services.Classes
 
         public async Task<bool> UpdatePlanDetailsAsync(int planId, PlanToUpdateViewModel planToUpdate, CancellationToken ct = default)
         {
-            var plan = await _planRepository.GetById(planId, ct);
+            var plan = await unitOfWork.GetRepository<Plan>().GetById(planId, ct);
             if (plan == null)
                 return false;
 
@@ -77,18 +76,18 @@ namespace GymManagementSystem.BLL.Services.Classes
             plan.DurationDays = planToUpdate.DurationDays;
             plan.Price = planToUpdate.Price;
 
-            _planRepository.Update(plan);
-            var result = await _planRepository.SaveChangesAsync();
+            unitOfWork.GetRepository<Plan>().Update(plan);
+            var result = await unitOfWork.CompleteAsync();
             return result > 0;
 
         }
 
         public async Task<bool> ToggleChangePlanStatusAsync(int planId, CancellationToken ct = default)
         {
-            var plan = await _planRepository.GetById(planId, ct);
+            var plan = await unitOfWork.GetRepository<Plan>().GetById(planId, ct);
             if (plan == null) return false;
 
-            var hasMemberShip = await _planRepository.AnyAsync(p => p.Id == planId && p.Memberships.Any(), ct);
+            var hasMemberShip = await unitOfWork.GetRepository<Plan>().AnyAsync(p => p.Id == planId && p.Memberships.Any(), ct);
             if (hasMemberShip) return false;
 
             if (plan.IsActive)
@@ -96,7 +95,7 @@ namespace GymManagementSystem.BLL.Services.Classes
             else
                 plan.IsActive = true;
 
-            var result = await _planRepository.SaveChangesAsync();
+            var result = await unitOfWork.CompleteAsync();
             return result > 0;
         }
     }

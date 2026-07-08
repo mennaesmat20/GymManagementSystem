@@ -251,6 +251,20 @@ section.workout {
         color: #070093;
     }
 
+.btn-fill-red {
+    background-color: #DC3545;
+    border-color: #DC3545;
+    color: #fff;
+}
+
+    /* Filled Button - Hover State (Switch to Outline) */
+.btn-fill-red {
+    background-color: transparent;
+    border-color: #DC3545;
+    color: #fff;
+}
+/*#DC3545*/
+
 /* Outline Button - Default State */
 .btn-outline {
     background-color: transparent;
