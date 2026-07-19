@@ -57,13 +57,13 @@ namespace GymManagementSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id, CancellationToken token)
         {
-            var session = await sessionServices.GetSessionByIdAsync(id, token);
-            if(session == null)
+            var result = await sessionServices.GetSessionByIdAsync(id, token);
+            if(!result.Success)
             {
                 TempData["ErrorMessage"] = "Session not found!";
                 return RedirectToAction(nameof(Index));
             }
-            return View(session);
+            return View(result.Value);
         }
 
         [HttpGet]
@@ -103,13 +103,13 @@ namespace GymManagementSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id, CancellationToken token)
         {
-            var session = await sessionServices.GetSessionByIdAsync(id, token);
-            if(session == null)
+            var result = await sessionServices.GetSessionByIdAsync(id, token);
+            if(!result.Success)
             {
                 TempData["ErrorMessage"] = "Session Not Found";
                 return RedirectToAction(nameof(Index));
             }
-            return View(session);
+            return View(result.Value);
         }
 
         [HttpPost]

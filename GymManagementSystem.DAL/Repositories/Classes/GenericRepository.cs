@@ -14,7 +14,7 @@ namespace GymManagementSystem.DAL.Repositories.Classes
             _context = context;
         }
 
-        public async Task<IEnumerable<TEntity>> GetAll(bool IsTracked, CancellationToken token = default)
+        public async Task<IEnumerable<TEntity>> GetAll(bool IsTracked = false, CancellationToken token = default)
         {
             var entities = IsTracked ? _context.Set<TEntity>() : _context.Set<TEntity>().AsNoTracking();
             return await _context.Set<TEntity>().ToListAsync();
@@ -36,6 +36,9 @@ namespace GymManagementSystem.DAL.Repositories.Classes
         {
             return await _context.Set<TEntity>().AnyAsync(predicate, token);
         }
+
+        public Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken token = default)
+        => predicate is null ? _context.Set<TEntity>().AsNoTracking().CountAsync(token) : _context.Set<TEntity>().AsNoTracking().CountAsync(predicate, token);
 
         public void Add(TEntity entity)
         {

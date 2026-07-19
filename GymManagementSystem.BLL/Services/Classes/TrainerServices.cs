@@ -1,4 +1,6 @@
-﻿using GymManagementSystem.BLL.Services.Interfaces;
+﻿using AutoMapper;
+using GymManagementSystem.BLL.Common;
+using GymManagementSystem.BLL.Services.Interfaces;
 using GymManagementSystem.BLL.ViewModels.Trainer_ViewModels;
 using GymManagementSystem.DAL.Entities;
 using GymManagementSystem.DAL.Repositories.Interfaces;
@@ -8,9 +10,12 @@ namespace GymManagementSystem.BLL.Services.Classes
     public class TrainerServices : ITrainerServices
     {
         private readonly IUnitOfWork unitOfWork;
-        public TrainerServices(IUnitOfWork _unitOfWork)
+        private readonly IMapper mapper;
+
+        public TrainerServices(IUnitOfWork _unitOfWork, IMapper _mapper)
         {
             unitOfWork = _unitOfWork;
+            mapper = _mapper;
         }
 
         // Get
@@ -19,114 +24,77 @@ namespace GymManagementSystem.BLL.Services.Classes
             var trainers = await unitOfWork.GetRepository<Trainer>().GetAll(false, ct);
             if (trainers == null)
                 return [];
-            var trainerViewModels = trainers.Select(t => new TrainerViewModel
-            {
-                Id = t.Id,
-                Name = t.Name,
-                Email = t.Email,
-                Phone = t.Phone,
-                Specialties = t.Specialty.ToString(),
-            });
+            var trainerViewModels = mapper.Map<IEnumerable<Trainer>, IEnumerable<TrainerViewModel>>(trainers);
             return trainerViewModels;
         }
             
 
-        public async Task<TrainerViewModel?> GetTrainerDetailsAsync(int trainerId, CancellationToken ct = default)
+        public async Task<Result<TrainerViewModel>> GetTrainerDetailsAsync(int trainerId, CancellationToken ct = default)
         {
             var trainer = await unitOfWork.GetRepository<Trainer>().GetById(trainerId, ct);
             if(trainer == null)
-                return null;
-            var trainerViewModel = new TrainerViewModel
-            {
-                Name = trainer.Name,
-                Email = trainer.Email,
-                Phone = trainer.Phone,
-                Specialties = trainer.Specialty.ToString(),
-                DateOfBirth = trainer.DateOfBirth.ToShortDateString(),
-                Address = $"{trainer.Address.BuildingNumber} - {trainer.Address.Street} - {trainer.Address.City}"
-            };
-            return trainerViewModel;
+                return Result<TrainerViewModel>.NotFound("Trainer not found!");
+            var trainerViewModel = mapper.Map<Trainer,TrainerViewModel>(trainer);
+            return Result<TrainerViewModel>.Ok(trainerViewModel);
         }
 
-        public async Task<TrainerToUpdateViewModel?> GetTrainerToUpdateAsync(int trainerId, CancellationToken ct = default)
+        public async Task<Result<TrainerToUpdateViewModel>> GetTrainerToUpdateAsync(int trainerId, CancellationToken ct = default)
         {
             var trainer = await unitOfWork.GetRepository<Trainer>().GetById(trainerId, ct);
             if(trainer == null)
-                return null;
-            var trainerToUpdateViewModel = new TrainerToUpdateViewModel
-            {
-                Name = trainer.Name,
-                Email = trainer.Email,
-                Phone = trainer.Phone,
-                BuildingNumber = trainer.Address.BuildingNumber,
-                Street = trainer.Address.Street,
-                City = trainer.Address.City,
-                Specialties = trainer.Specialty
-            };
-            return trainerToUpdateViewModel;
+                return Result<TrainerToUpdateViewModel>.NotFound("Trainer not found!");
+            var trainerToUpdateViewModel = mapper.Map<Trainer, TrainerToUpdateViewModel>(trainer);
+            return Result<TrainerToUpdateViewModel>.Ok(trainerToUpdateViewModel);
         }
 
         // Post
-        public async Task<bool> CreateTrainerAsync(CreateTrainerViewModel trainerToCreate, CancellationToken ct = default)
+        public async Task<Result> CreateTrainerAsync(CreateTrainerViewModel trainerToCreate, CancellationToken ct = default)
         {
             var emailExists = await unitOfWork.GetRepository<Trainer>().AnyAsync(m => m.Email == trainerToCreate.Email, ct);
             var phoneExists = await unitOfWork.GetRepository<Trainer>().AnyAsync(m => m.Phone == trainerToCreate.Phone, ct);
 
-            if (emailExists || phoneExists)
-                return false;
-            var trainer = new Trainer()
-            {
-                Name = trainerToCreate.Name,
-                Email = trainerToCreate.Email,
-                Phone = trainerToCreate.Phone,
-                DateOfBirth = trainerToCreate.DateOfBirth,
-                Address = new Address()
-                {
-                    BuildingNumber = trainerToCreate.BuildingNumber,
-                    Street = trainerToCreate.Street,
-                    City = trainerToCreate.City
-                },
-                Specialty = trainerToCreate.Specialties
-            };
+            if (emailExists)
+                return Result.ValidationFailed("This email is already exist");
+            else if (phoneExists)
+                return Result.ValidationFailed("This phone number is already exist");
+
+            var trainer = mapper.Map<CreateTrainerViewModel,Trainer>(trainerToCreate);
             unitOfWork.GetRepository<Trainer>().Add(trainer);
 
             var result = await unitOfWork.CompleteAsync();
-            return result > 0;
+            return result > 0 ? Result.Ok() : Result.Fail("Failed to create a trainer");
         }
 
-        public async Task<bool> UpdateTrainerDetailsAsync(int trainerId, TrainerToUpdateViewModel trainerToUpdate, CancellationToken ct = default)
+        public async Task<Result> UpdateTrainerDetailsAsync(int trainerId, TrainerToUpdateViewModel trainerToUpdate, CancellationToken ct = default)
         {
             var trainer = await unitOfWork.GetRepository<Trainer>().GetById(trainerId, ct);
             if (trainer == null)
-                return false;
-            if (await unitOfWork.GetRepository<Trainer>().AnyAsync(m => m.Email == trainerToUpdate.Email && m.Id != trainerId, ct)) return false;
-            if (await unitOfWork.GetRepository<Trainer>().AnyAsync(m => m.Phone == trainerToUpdate.Phone && m.Id != trainerId, ct)) return false;
+                return Result.NotFound("Trainer not found!");
 
-            trainer.Name = trainerToUpdate.Name;
-            trainer.Email = trainerToUpdate.Email;
-            trainer.Phone = trainerToUpdate.Phone;
-            trainer.Address.BuildingNumber = trainerToUpdate.BuildingNumber;
-            trainer.Address.Street = trainerToUpdate.Street;
-            trainer.Address.City = trainerToUpdate.City;
-            trainer.Specialty = trainerToUpdate.Specialties;
+            if (await unitOfWork.GetRepository<Trainer>().AnyAsync(m => m.Email == trainerToUpdate.Email && m.Id != trainerId, ct))
+                return Result.ValidationFailed("This email is already exist");
+            if (await unitOfWork.GetRepository<Trainer>().AnyAsync(m => m.Phone == trainerToUpdate.Phone && m.Id != trainerId, ct))
+                return Result.ValidationFailed("This phone number is already exist");
+
+            mapper.Map(trainerToUpdate, trainer);
             trainer.UpdatedAt = DateTime.Now;
 
             unitOfWork.GetRepository<Trainer>().Update(trainer);
 
             var result = await unitOfWork.CompleteAsync();
-            return result > 0;
+            return result > 0 ? Result.Ok() : Result.Fail("Failed to update a trainer");
         }
 
-        public async Task<bool> DeleteTrainerAsync(int trainerId, CancellationToken ct = default)
+        public async Task<Result> DeleteTrainerAsync(int trainerId, CancellationToken ct = default)
         {
             var HasSessions = await unitOfWork.GetRepository<Trainer>().AnyAsync(t => t.Id == trainerId && t.Sessions.Any(), ct);
             if (HasSessions)
-                return false;
+                return Result.ValidationFailed("Can not delete a trainer with future sessions");
 
             unitOfWork.GetRepository<Trainer>().Delete(trainerId);
 
             var result = await unitOfWork.CompleteAsync();
-            return result > 0;
+            return result > 0 ? Result.Ok() : Result.Fail("Failed to delete a trainer");
         }
     }
 }

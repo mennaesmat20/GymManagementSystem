@@ -20,7 +20,8 @@ namespace GymManagementSystem.BLL.Services.Classes
         public async Task<IEnumerable<SessionViewModel>> GetAllSessionsAsync(CancellationToken token)
         {
             var sessions = await unitOfWork.SessionRepository.GetAllSessionsWithTrainerAndCategoryAsync(token);
-            if (!sessions.Any()) return null;
+            if (!sessions.Any()) 
+                return [];
 
             sessions = sessions.OrderByDescending(x => x.StartDate);
 
@@ -32,13 +33,13 @@ namespace GymManagementSystem.BLL.Services.Classes
             return MappedSessions;
         }
 
-        public async Task<SessionViewModel?> GetSessionByIdAsync(int SessionId, CancellationToken token)
+        public async Task<Result<SessionViewModel>> GetSessionByIdAsync(int SessionId, CancellationToken token)
         {
             var session = await unitOfWork.SessionRepository.GetSessionByIdWithTrainerAndCategoryAsync(SessionId, token);
-            if (session == null) return null;
+            if (session == null) return Result<SessionViewModel>.NotFound("Session not found!");
             var mappedSession = mapper.Map<Session, SessionViewModel>(session);
             mappedSession.AvailableSlots = mappedSession.Capacity - await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(mappedSession.Id, token);
-            return mappedSession;
+            return Result<SessionViewModel>.Ok(mappedSession);
         }
 
         public async Task<IEnumerable<TrainerSelectViewModel>> GetTrainersForDropDownAsync(CancellationToken token = default)

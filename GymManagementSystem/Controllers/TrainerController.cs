@@ -31,7 +31,7 @@ namespace GymManagementSystem.Controllers
                 return View(nameof(Create), model);
 
             var result = await _trainerServices.CreateTrainerAsync(model, ct);
-            if(result)
+            if(result.Success)
                 TempData["Success"] = "Trainer created successfully.";
             else
                 TempData["Failed"] = "Failed to create trainer.";
@@ -42,25 +42,25 @@ namespace GymManagementSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> TrainerDetails(int id, CancellationToken ct)
         {
-            var trainer = await _trainerServices.GetTrainerDetailsAsync(id, ct);
-            if(trainer is null)
+            var result = await _trainerServices.GetTrainerDetailsAsync(id, ct);
+            if(!result.Success)
             {
                 TempData["Failed"] = "Trainer not found.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(trainer);
+            return View(result.Value);
         }
 
         [HttpGet]
         public async Task<IActionResult> EditTrainer(int id, CancellationToken ct)
         {
-            var trainer = await _trainerServices.GetTrainerToUpdateAsync(id, ct);
-            if(trainer is null)
+            var result = await _trainerServices.GetTrainerToUpdateAsync(id, ct);
+            if(!result.Success)
             {
                 TempData["Failed"] = "Trainer not found.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(trainer);
+            return View(result.Value);
         }
 
         [HttpPost]
@@ -69,7 +69,7 @@ namespace GymManagementSystem.Controllers
             if (!ModelState.IsValid)
                 return View(model);
             var result = await _trainerServices.UpdateTrainerDetailsAsync(id, model, ct);
-            if(result)
+            if(result.Success)
                 TempData["Success"] = "Trainer updated successfully.";
             else
                 TempData["Failed"] = "Failed to update trainer.";
@@ -80,8 +80,8 @@ namespace GymManagementSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
-            var trainer = await _trainerServices.GetTrainerDetailsAsync(id, ct);
-            if(trainer is null)
+            var result = await _trainerServices.GetTrainerDetailsAsync(id, ct);
+            if(!result.Success)
             {
                 TempData["Failed"] = "Trainer not found.";
                 return RedirectToAction(nameof(Index));
@@ -93,7 +93,7 @@ namespace GymManagementSystem.Controllers
         public async Task<IActionResult> DeleteConfirmed([FromRoute]int id, CancellationToken ct)
         {
             var result = await _trainerServices.DeleteTrainerAsync(id, ct);
-            if(result)
+            if(result.Success)
                 TempData["Success"] = "Trainer deleted successfully.";
             else
                 TempData["Failed"] = "Failed to delete trainer.";

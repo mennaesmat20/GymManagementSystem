@@ -1,6 +1,5 @@
 ﻿using GymManagementSystem.BLL.Services.Interfaces;
 using GymManagementSystem.BLL.ViewModels.Plan_ViewModels;
-using GymManagementSystem.DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -21,26 +20,26 @@ namespace GymManagementSystem.Controllers
 
         public async Task<IActionResult> details(int id, CancellationToken token)
         {
-            var plan = await _planServices.GetPlanDetailsAsync(id, token);
-            if (plan == null)
+            var result = await _planServices.GetPlanDetailsAsync(id, token);
+            if (!result.Success)
             {
                 TempData["ErrorMessage"] = "Plan not found.";
                 return RedirectToAction(nameof(Index));
             }
                 
-            return View(plan);
+            return View(result.Value);
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id, CancellationToken ct)
         {
-            var plan = await _planServices.GetPlanToUpdateAsync(id, ct);
-            if (plan == null)
+            var result = await _planServices.GetPlanToUpdateAsync(id, ct);
+            if (!result.Success)
             {
                 TempData["ErrorMessage"] = "Plan not found.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(plan);
+            return View(result.Value);
         }
 
         [HttpPost]
@@ -49,7 +48,7 @@ namespace GymManagementSystem.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var result = await _planServices.UpdatePlanDetailsAsync(id, model, ct);
-            if (result)
+            if (result.Success)
             {
                 TempData["SuccessMessage"] = "Plan updated successfully.";
                 return RedirectToAction(nameof(Index));
@@ -65,7 +64,7 @@ namespace GymManagementSystem.Controllers
         public async Task<IActionResult> Activate(int id, CancellationToken ct)
         {
             var result = await _planServices.ToggleChangePlanStatusAsync(id, ct);
-            if (result)
+            if (result.Success)
                 TempData["SuccessMessage"] = "Plan status updated successfully.";
             else
                 TempData["ErrorMessage"] = "Failed to update plan status.";

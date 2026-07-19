@@ -47,8 +47,16 @@ else if (TempData["Failed"] is not null)
 						<tr>
 							<td>
 								<span class="avatar">
-									<img src="~/images/User.jpg" alt="Default Avatar" class="rounded-circle"
-										 style="width: 40px; height: 40px;" />
+									@if (string.IsNullOrWhiteSpace(member.Photo))
+									{
+										<img src="~/images/DefaultImage.jpg" alt="Default Avatar" class="rounded-circle"
+										style="width: 40px; height: 40px;" />
+									}
+									else
+									{
+										<img src="@Url.Action("Picture", "Member", new{id = member.Id})" alt="Default Avatar" class="rounded-circle"
+											 style="width: 40px; height: 40px;" />
+									}
 								</span>
 							</td>
 							<td><span>@member.Name</span></td>

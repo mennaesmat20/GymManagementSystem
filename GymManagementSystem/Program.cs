@@ -1,17 +1,19 @@
 using GymManagementSystem.BLL.Services.Classes;
 using GymManagementSystem.BLL.Services.Interfaces;
 using GymManagementSystem.BLL.Utiltites;
+using GymManagementSystem.DAL.DataSeeding;
 using GymManagementSystem.DAL.DbContexts;
 using GymManagementSystem.DAL.Repositories.Classes;
 using GymManagementSystem.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace GymManagementSystem
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -22,13 +24,18 @@ namespace GymManagementSystem
                 Options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped<IMemberServices,MemberServices>();
             builder.Services.AddScoped<IPlanServices,PlanServices>();
             builder.Services.AddScoped<ITrainerServices,TrainerServices>();
             builder.Services.AddScoped<ISessionServices,SessionServices>();
+            builder.Services.AddScoped<IAnalyticsServices,AnalyticsServices>();
+            builder.Services.AddScoped<IAttachmentServices,AttachmentServices>();
             builder.Services.AddAutoMapper(m => m.AddProfile(new MappingProfile()));
 
             var app = builder.Build();
+
+            await app.MigrationAndSeedDatabaseAsync();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
