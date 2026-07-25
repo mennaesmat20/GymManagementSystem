@@ -1,10 +1,12 @@
 ﻿using GymManagementSystem.BLL.Services.Interfaces;
 using GymManagementSystem.BLL.ViewModels.Trainer_ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace GymManagementSystem.Controllers
 {
+    [Authorize]
     public class TrainerController : Controller
     {
         private readonly ITrainerServices _trainerServices;
@@ -19,12 +21,14 @@ namespace GymManagementSystem.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> CreateTrainer(CreateTrainerViewModel model, CancellationToken ct)
         {
             if (!ModelState.IsValid)
@@ -52,6 +56,7 @@ namespace GymManagementSystem.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> EditTrainer(int id, CancellationToken ct)
         {
             var result = await _trainerServices.GetTrainerToUpdateAsync(id, ct);
@@ -64,6 +69,7 @@ namespace GymManagementSystem.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> EditTrainer(int id, TrainerToUpdateViewModel model, CancellationToken ct)
         {
             if (!ModelState.IsValid)
@@ -78,6 +84,7 @@ namespace GymManagementSystem.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var result = await _trainerServices.GetTrainerDetailsAsync(id, ct);
@@ -90,6 +97,7 @@ namespace GymManagementSystem.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteConfirmed([FromRoute]int id, CancellationToken ct)
         {
             var result = await _trainerServices.DeleteTrainerAsync(id, ct);

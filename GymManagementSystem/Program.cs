@@ -3,8 +3,10 @@ using GymManagementSystem.BLL.Services.Interfaces;
 using GymManagementSystem.BLL.Utiltites;
 using GymManagementSystem.DAL.DataSeeding;
 using GymManagementSystem.DAL.DbContexts;
+using GymManagementSystem.DAL.Entities;
 using GymManagementSystem.DAL.Repositories.Classes;
 using GymManagementSystem.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
@@ -33,6 +35,20 @@ namespace GymManagementSystem
             builder.Services.AddScoped<IAttachmentServices,AttachmentServices>();
             builder.Services.AddAutoMapper(m => m.AddProfile(new MappingProfile()));
 
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(Config =>
+            {
+                Config.User.RequireUniqueEmail = true;
+                Config.Lockout.MaxFailedAccessAttempts = 5;
+                Config.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
+
+            }).AddEntityFrameworkStores<GymDbContext>();
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/Login";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            });
+
             var app = builder.Build();
 
             await app.MigrationAndSeedDatabaseAsync();
@@ -48,6 +64,7 @@ namespace GymManagementSystem
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();

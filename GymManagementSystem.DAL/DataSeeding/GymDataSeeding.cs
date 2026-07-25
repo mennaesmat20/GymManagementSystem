@@ -21,7 +21,7 @@ namespace GymManagementSystem.DAL.DataSeeding
                         logger.LogInformation($"Plans Seeded With Count = {plans.Count}");
                     }
 
-                    if (dbContext.ChangeTracker.HasChanges())
+                    if (dbContext.ChangeTracker.HasChanges()) 
                         await dbContext.SaveChangesAsync();
                     else
                         logger.LogInformation("Plans Already Seeded");
